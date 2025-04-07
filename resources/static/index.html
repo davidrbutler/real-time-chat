@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="login-page" class="page active">
+    <h2>Enter Chat</h2>
+    <div class="input-area">
+        <input type="text" id="input-username" placeholder="Enter your username" />
+        <button id="send-username-btn">Join Chat</button>
+    </div>
+    <p id="login-error" class="error-message" style="display: none;"></p>
+</div>
+
+<div id="chat-page" class="page" style="display: none;">
+    <div class="main-chat-area">
+        <div class="chat-container">
+            <div id="chat-header">
+                <span id="chat-with">Public chat</span>
+                <button id="public-chat-btn" title="Switch to Public Chat">Public</button>
+            </div>
+            <div id="messages">
+            </div>
+            <div class="input-area">
+                <textarea id="input-msg" placeholder="Type your message..." disabled></textarea>
+                <button id="send-msg-btn" disabled>Send</button>
+            </div>
+        </div>
+
+        <div id="user-list-container">
+            <h3>Online Users</h3>
+            <div id="users">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script src="script.js"></script>
+</body>
+</html>

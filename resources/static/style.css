@@ -1,0 +1,236 @@
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.page {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* Login Page specific styles */
+#login-page { max-width: 450px; }
+#login-page h2 { text-align: center; margin-bottom: 20px; }
+
+/* Main layout */
+.main-chat-area {
+    display: flex;
+    gap: 20px;
+    height: 600px; /* Or adjust as needed */
+}
+
+/* Chat Container adjustments */
+.chat-container {
+    flex-grow: 1;
+    width: auto; /* Let flexbox handle width */
+    height: 100%;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px; /* Optional rounding */
+}
+
+/* Chat Header Styles */
+#chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ccc;
+    background-color: #f8f9fa;
+}
+
+#chat-with {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+#public-chat-btn {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 4px;
+}
+#public-chat-btn:hover {
+    background-color: #e9ecef;
+}
+/* Style for active public chat button */
+#public-chat-btn.active-chat {
+    background-color: #d1e7ff;
+    font-weight: bold;
+    border-color: #a6cfff;
+}
+
+
+#messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Message container styles */
+.message-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    background-color: #e9e9e9;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 85%;
+    word-wrap: break-word;
+    align-self: flex-start;
+    margin-bottom: 5px; /* Consistency */
+}
+.event-message {
+    align-self: center;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.9em;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin: 5px 0;
+    max-width: fit-content;
+}
+.sender {
+    font-weight: bold;
+    margin-right: 8px;
+    flex-basis: 100%;
+    margin-bottom: 4px;
+    color: #333; /* Darker sender name */
+}
+.message {
+    flex-grow: 1;
+    margin-right: 8px;
+    flex-basis: 100%; /* Ensure message content is below sender */
+    order: 2;
+    color: #111; /* Slightly darker message text */
+}
+.date {
+    font-size: 0.75em;
+    color: #555;
+    white-space: nowrap;
+    margin-left: auto; /* Push date to the right */
+    padding-left: 10px;
+    order: 3;
+    align-self: flex-end;
+}
+
+/* Input area styles */
+.input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    align-items: center;
+}
+#input-username {
+    flex-grow: 1; margin-right: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;
+}
+#input-msg {
+    flex-grow: 1; margin-right: 10px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; resize: none; min-height: 40px;
+}
+#send-username-btn, #send-msg-btn {
+    padding: 10px 20px; cursor: pointer; border: none; background-color: #007bff; color: white; border-radius: 4px; white-space: nowrap;
+}
+#send-username-btn:hover, #send-msg-btn:hover { background-color: #0056b3; }
+#send-msg-btn:disabled, #send-username-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+.error-message { color: red; font-size: 0.9em; text-align: center; margin-top: 10px; }
+
+/* User List Styles */
+#user-list-container {
+    width: 200px; /* Fixed width */
+    min-width: 150px; /* Prevent excessive shrinking */
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 4px;
+}
+
+#user-list-container h3 {
+    text-align: center;
+    margin: 0;
+    padding: 10px;
+    font-size: 1.1em;
+    border-bottom: 1px solid #ccc;
+    background-color: #e9ecef; /* Header background */
+}
+
+#users {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px 5px; /* Add some padding */
+}
+
+/* *** NEW/MODIFIED STYLES for Stage 8 *** */
+
+/* Container for each user row */
+.user-container {
+    display: flex;
+    justify-content: space-between; /* Push counter to right */
+    align-items: center; /* Vertically align name and counter */
+    padding: 8px 10px; /* Adjust padding */
+    margin-bottom: 5px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.user-container:hover {
+    background-color: #e9e9e9;
+}
+
+/* Style for the username part */
+.user {
+    flex-grow: 1; /* Allow username to take available space */
+    word-break: break-all; /* Keep this */
+    margin-right: 5px; /* Add space before counter */
+}
+
+/* Style for active chat user */
+.user-container.active-chat {
+    background-color: #d1e7ff;
+    border-color: #a6cfff;
+}
+.user-container.active-chat .user {
+    font-weight: bold;
+}
+
+/* Style for the unread message counter */
+.new-message-counter {
+    background-color: #dc3545; /* Red for unread */
+    color: white;
+    font-size: 0.75em;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px; /* Pill shape */
+    min-width: 18px; /* Ensure it's visible even with '1' */
+    text-align: center;
+    display: none; /* Hide initially */
+    flex-shrink: 0; /* Prevent counter from shrinking */
+}
