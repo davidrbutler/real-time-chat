@@ -13,13 +13,13 @@ public class ChatMessage {
     private String sender;
     private MessageType type;
     private String timestamp;
-    private String recipient; // NEW: Add recipient field
+    private String recipient;
 
     public enum MessageType {
         CHAT,
         JOIN,
         LEAVE,
         LOG,
-        PRIVATE // Optional: Add specific type for private? Or just use recipient field with CHAT? Let's use recipient field with CHAT type.
+        PRIVATE
     }
 }

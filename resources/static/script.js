@@ -1,6 +1,4 @@
-// Wait for the HTML document to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Get element references
     const loginPage = document.getElementById('login-page');
     const chatPage = document.getElementById('chat-page');
     const usernameInput = document.getElementById('input-username');
@@ -9,17 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('input-msg');
     const sendButton = document.getElementById('send-msg-btn');
     const messagesContainer = document.getElementById('messages');
-    const usersList = document.getElementById('users'); // The <div> containing user containers
+    const usersList = document.getElementById('users');
     const chatWithDisplay = document.getElementById('chat-with');
     const publicChatButton = document.getElementById('public-chat-btn');
-    // Optional: Get reference if you add a public counter
-    // const publicChatCounter = document.getElementById('public-chat-counter');
 
     let stompClient = null;
     let username = null;
-    let currentChatTarget = 'public'; // 'public' or a username
+    let currentChatTarget = 'public';
 
-    // Function to send logs to backend
     function sendLogToServer(level, message) {
         if (stompClient && stompClient.connected && username) {
             try {
@@ -30,9 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Helper Functions ---
     function setActiveUserIndicator(targetUsername) {
-        // Remove active class from all user containers and public button
         document.querySelectorAll('#users .user-container, #public-chat-btn').forEach(el => {
             el.classList.remove('active-chat');
         });
@@ -42,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else { sendLogToServer('ERROR', '[setActiveUserIndicator] publicChatButton is null!'); }
         } else {
             if (!usersList) { sendLogToServer('ERROR', '[setActiveUserIndicator] usersList is null!'); return; }
-            // Find the user container and add active class
             const userContainer = findUserContainer(targetUsername);
             if (userContainer) {
                 userContainer.classList.add('active-chat');
@@ -52,11 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Helper to find the specific user-container element by username
     function findUserContainer(targetUsername) {
         if (!usersList) return null;
         for (let container of usersList.children) {
-            // Check if it's a user container and find the inner .user div
             if (container.classList.contains('user-container')) {
                 const userDiv = container.querySelector('.user');
                 if (userDiv && userDiv.textContent === targetUsername) {
@@ -64,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        return null; // Not found
+        return null;
     }
 
 
@@ -85,14 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return messageHtml;
     }
 
-    // --- Chat Switching Functions ---
 
     function switchToPublicChat() {
         sendLogToServer('DEBUG', 'Entering switchToPublicChat function.');
         if (!chatWithDisplay) sendLogToServer('ERROR', 'chatWithDisplay is null at start of switchToPublicChat!');
         if (!messagesContainer) sendLogToServer('ERROR', 'messagesContainer is null at start of switchToPublicChat!');
 
-        // Removed the check: if (currentChatTarget === 'public') return;
 
         sendLogToServer('INFO', "[ChatSwitch] Switching to Public Chat");
         currentChatTarget = 'public';
@@ -106,11 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setActiveUserIndicator('public');
 
-        // *** Reset and hide public chat counter (if implemented) ***
-        // if (publicChatCounter) {
-        //     publicChatCounter.textContent = '0';
-        //     publicChatCounter.style.display = 'none';
-        // }
 
         fetchPublicHistory();
         sendLogToServer('DEBUG', 'Exiting switchToPublicChat function.');
@@ -137,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setActiveUserIndicator(targetUsername);
 
-        // *** Reset and hide the counter for this user ***
         const userContainer = findUserContainer(targetUsername);
         if (userContainer) {
             const counter = userContainer.querySelector('.new-message-counter');
@@ -155,17 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- User List Management ---
     function addUserToList(userToAdd) {
-        if (userToAdd === username || !usersList) return; // Don't add self, check usersList exists
+        if (userToAdd === username || !usersList) return;
 
-        // Check if user container already exists
         if (findUserContainer(userToAdd)) {
             sendLogToServer('DEBUG', `[UserList] User container for ${userToAdd} already exists.`);
             return;
         }
 
-        // Create elements with the new structure
         const userContainer = document.createElement('div');
         userContainer.classList.add('user-container');
 
@@ -176,25 +155,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const counterSpan = document.createElement('span');
         counterSpan.classList.add('new-message-counter');
         counterSpan.textContent = '0';
-        counterSpan.style.display = 'none'; // Hide initially
+        counterSpan.style.display = 'none';
 
-        // Add elements to container
         userContainer.appendChild(userDiv);
         userContainer.appendChild(counterSpan);
 
-        // Add click listener to the container
         userContainer.addEventListener('click', () => switchToPrivateChat(userToAdd));
 
-        // Append container to the list
         usersList.appendChild(userContainer);
         sendLogToServer('INFO', `[UserList] Added user container for ${userToAdd} to list.`);
     }
 
     function removeUserFromList(userToRemove) {
         if (!usersList) { sendLogToServer('ERROR', '[removeUserFromList] usersList is null!'); return; }
-        const userContainer = findUserContainer(userToRemove); // Find the container
+        const userContainer = findUserContainer(userToRemove);
         if (userContainer) {
-            userContainer.remove(); // Remove the whole container
+            userContainer.remove();
             sendLogToServer('INFO', `[UserList] Removed user container for ${userToRemove} from list.`);
             if(currentChatTarget === userToRemove) {
                 sendLogToServer('INFO', `[UserList] Current chat target ${userToRemove} disconnected. Switching to public chat.`);
@@ -205,36 +181,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Display & Message Handling ---
     function displayMessage(messagePayload) {
         let msg;
         try { msg = JSON.parse(messagePayload); }
         catch (e) { sendLogToServer('ERROR', `Failed to parse message payload: ${messagePayload} - Error: ${e}`); return; }
         let shouldDisplay = false; let messageHtml = '';
-        let isPrivateAndDisplayed = false; // Flag for reordering later
-        let otherUser = null; // Store the other user for reordering
+        let isPrivateAndDisplayed = false;
+        let otherUser = null;
 
         if (msg.type === 'JOIN') { shouldDisplay = true; addUserToList(msg.sender); messageHtml = createMessageHtml(msg); }
         else if (msg.type === 'LEAVE') { shouldDisplay = true; removeUserFromList(msg.sender); messageHtml = createMessageHtml(msg); }
         else if (msg.type === 'CHAT') {
             const isPublic = !msg.recipient || msg.recipient.toLowerCase() === 'public';
-            // Determine if the message should be displayed based on current view
             if (isPublic && currentChatTarget === 'public') {
-                shouldDisplay = true; // Show public message in public view
-            } else if (!isPublic && // It's a private message
-                ((msg.sender === username && msg.recipient === currentChatTarget) || // Sent by me to current target
-                    (msg.sender === currentChatTarget && msg.recipient === username))) { // Sent by current target to me
-                shouldDisplay = true; // Show private message if it involves the currently active private chat
-                isPrivateAndDisplayed = true; // Mark for reordering
-                // Identify the other user in this private chat
+                shouldDisplay = true;
+            } else if (!isPublic &&
+                ((msg.sender === username && msg.recipient === currentChatTarget) ||
+                    (msg.sender === currentChatTarget && msg.recipient === username))) {
+                shouldDisplay = true;
+                isPrivateAndDisplayed = true;
                 otherUser = (msg.sender === username) ? msg.recipient : msg.sender;
             } else {
-                // Message is not for the current view - INCREMENT COUNTER
                 console.log(`[DisplayMessage] Received ${isPublic ? 'public' : 'private'} message for/from ${msg.sender}/${msg.recipient} while viewing ${currentChatTarget}. Ignored for display.`);
                 shouldDisplay = false;
 
-                // Find the relevant container and increment counter
-                const counterTargetUser = isPublic ? null : msg.sender; // Counter belongs to the sender if private msg not shown
+                const counterTargetUser = isPublic ? null : msg.sender;
                 if (counterTargetUser) {
                     const userContainer = findUserContainer(counterTargetUser);
                     if (userContainer) {
@@ -243,27 +214,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             let currentCount = parseInt(counter.textContent) || 0;
                             currentCount++;
                             counter.textContent = currentCount;
-                            counter.style.display = 'inline-block'; // Show counter
+                            counter.style.display = 'inline-block';
                             sendLogToServer('DEBUG', `Incremented counter for ${counterTargetUser} to ${currentCount}`);
                         }
                     } else {
                         sendLogToServer('WARN', `Could not find user container to increment counter for ${counterTargetUser}`);
                     }
                 }
-                // Optional: Handle public counter increment here
-                // else if (isPublic && publicChatCounter) { ... }
             }
-            // Generate HTML only if it should be displayed
             if (shouldDisplay) { messageHtml = createMessageHtml(msg); }
         } else if (msg.type === 'LOG') { shouldDisplay = false; }
         else { sendLogToServer('WARN', `Unknown message type received: ${msg.type}`); return; }
-        // Append and scroll if the message should be displayed
         if (shouldDisplay && messageHtml) {
             if(messagesContainer) {
                 messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-                // *** Reorder user list if a private message was just displayed ***
                 if (isPrivateAndDisplayed && otherUser && usersList) {
                     const otherUserContainer = findUserContainer(otherUser);
                     if (otherUserContainer && usersList.firstChild !== otherUserContainer) {
@@ -276,7 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Function to send a chat message via WebSocket
     function sendChatMessage() {
         const messageContent = messageInput.value.trim();
         if (messageContent && stompClient && stompClient.connected && username) {
@@ -286,7 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
             stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
             messageInput.value = '';
 
-            // *** Reorder user list after sending a private message ***
             if (recipient !== 'public' && usersList) {
                 const recipientContainer = findUserContainer(recipient);
                 if (recipientContainer && usersList.firstChild !== recipientContainer) {
@@ -298,8 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- History Fetching ---
-    async function fetchPublicHistory() { /* ... keep existing (using createMessageHtml and innerHTML) ... */
+    async function fetchPublicHistory() {
         sendLogToServer('DEBUG', 'Entering fetchPublicHistory');
         try {
             sendLogToServer('INFO', "[fetchHistory] Fetching public history from /history...");
@@ -319,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { sendLogToServer('ERROR', `[fetchHistory] Failed to fetch public history: ${error}`); }
     }
 
-    async function fetchPrivateHistory(user1, user2) { /* ... keep existing (using createMessageHtml and innerHTML) ... */
+    async function fetchPrivateHistory(user1, user2) {
         sendLogToServer('DEBUG', `Entering fetchPrivateHistory for ${user1}/${user2}`);
         const endpointUsers = [user1, user2].sort();
         const endpoint = `/history/${endpointUsers[0]}/${endpointUsers[1]}`;
@@ -342,8 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Fetches the current list of online users via HTTP GET
-    async function fetchOnlineUsers() { /* ... keep existing ... */
+    async function fetchOnlineUsers() {
         sendLogToServer('DEBUG', 'Entering fetchOnlineUsers');
         try {
             sendLogToServer('INFO', "[fetchOnlineUsers] Fetching user list...");
@@ -351,9 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const users = await response.json();
             if(usersList) {
-                usersList.innerHTML = ''; // Clear current list first
+                usersList.innerHTML = '';
                 if (Array.isArray(users)) {
-                    // Add users, creating the new container structure
                     users.forEach(user => addUserToList(user));
                 } else {
                     sendLogToServer('WARN', `[fetchOnlineUsers] Received user list is not an array: ${users}`);
@@ -366,8 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Function to connect to WebSocket and subscribe
-    function connect(event) { /* ... keep existing ... */
+    function connect(event) {
         if(event) event.preventDefault();
         username = usernameInput.value.trim();
         if (username) {
@@ -382,8 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { loginError.textContent = "Please enter a username."; loginError.style.display = 'block'; }
     }
 
-    // Callback function for successful WebSocket connection
-    function onConnected() { /* ... keep existing (subscribes only to /topic/public) ... */
+    function onConnected() {
         sendLogToServer('DEBUG', 'Entering onConnected');
         messageInput.disabled = false; sendButton.disabled = false; loginError.style.display = 'none';
         try {
@@ -398,8 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sendLogToServer('DEBUG', 'Exiting onConnected');
     }
 
-    // Callback function for WebSocket connection errors
-    function onError(error) { /* ... keep existing ... */
+    function onError(error) {
         console.error('Could not connect to WebSocket server. Please refresh and try again!', error);
         sendLogToServer('ERROR', `Could not connect to WebSocket server: ${error}`);
         loginError.textContent = 'Could not connect to WebSocket. Please refresh.';
@@ -410,14 +368,11 @@ document.addEventListener('DOMContentLoaded', () => {
         stompClient = null;
     }
 
-    // Callback function for receiving messages from public topic
-    function onMessageReceived(payload) { /* ... keep existing ... */
+    function onMessageReceived(payload) {
         console.log("[onMessageReceived] Received message payload:", payload.body);
         displayMessage(payload.body);
     }
 
-    // --- Event Listeners ---
-    /* ... keep existing ... */
     joinButton.addEventListener('click', connect, true);
     usernameInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') { connect(event); } });
     sendButton.addEventListener('click', sendChatMessage);

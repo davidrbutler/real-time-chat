@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet; // *** Import LinkedHashSet ***
 import java.util.Objects;
 import java.util.Set;
-// Removed ConcurrentHashMap import
 
 @Component
 @RestController
@@ -32,7 +31,6 @@ public class WebSocketEventListener {
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
 
-    // *** CHANGE: Use a synchronized LinkedHashSet to maintain insertion order ***
     private final Set<String> onlineUsers = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
@@ -44,10 +42,9 @@ public class WebSocketEventListener {
 
         if (username != null) {
             logger.info("User Disconnected: {}", username);
-            boolean removed = onlineUsers.remove(username); // remove() is thread-safe on synchronizedSet
+            boolean removed = onlineUsers.remove(username);
             if (removed) {
-                logger.info("Removed {} from online users. Current online count: {}", username, onlineUsers.size()); // size() is thread-safe
-                // Broadcast LEAVE message
+                logger.info("Removed {} from online users. Current online count: {}", username, onlineUsers.size());
                 ChatMessage chatMessage = new ChatMessage();
                 chatMessage.setType(ChatMessage.MessageType.LEAVE);
                 chatMessage.setSender(username);
@@ -65,22 +62,19 @@ public class WebSocketEventListener {
     @GetMapping("/users")
     @ResponseBody
     public Set<String> getOnlineUsers() {
-        // Return a copy to avoid issues if the set is modified while being serialized
-        // The copy iteration order will reflect the LinkedHashSet's insertion order
         Set<String> usersCopy;
-        synchronized (onlineUsers) { // Synchronize access during copy creation
+        synchronized (onlineUsers) {
             usersCopy = new LinkedHashSet<>(onlineUsers);
         }
         logger.info("GET /users request received. Returning {} users in join order.", usersCopy.size());
-        return usersCopy; // Returns a LinkedHashSet copy (preserves order)
+        return usersCopy;
     }
 
     public void userJoined(String username) {
         if (username == null || username.isBlank()) return;
-        // add() is thread-safe on synchronizedSet
         boolean added = onlineUsers.add(username);
         if (added) {
-            logger.info("Added {} to online users (join order maintained). Current online count: {}", username, onlineUsers.size()); // size() is thread-safe
+            logger.info("Added {} to online users (join order maintained). Current online count: {}", username, onlineUsers.size());
         } else {
             logger.warn("User {} tried to join but was already in the onlineUsers set.", username);
         }

@@ -1,4 +1,4 @@
-package chat; // Ensure this package matches your project structure
+package chat;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -17,13 +17,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Prefix for messages handled by @MessageMapping methods (e.g., /app/chat.sendMessage)
         registry.setApplicationDestinationPrefixes("/app");
 
-        // Prefixes for broker destinations (both public topics and private user queues)
         registry.enableSimpleBroker("/topic", "/queue"); // ADDED /queue
 
-        // Prefix for user-specific destinations (used by convertAndSendToUser)
         registry.setUserDestinationPrefix("/user"); // ADDED THIS LINE
     }
 }
